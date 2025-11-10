@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: jellyfin-music-helper
+  shell:
+    interactive:
+      enabled: true
+
+streaming:
+  history:
+    file: StreamingHistory.json
+
+jellyfin:
+  base-url: http://jellyfin:8096
+  api-token:
+  similar-artist:
+    min-common-length: 7
+  featuring-artists:
+    markers:
+      - "feat."
+      - "featuring"
+      - "'vec"
+      - "with"
+      - "ft"

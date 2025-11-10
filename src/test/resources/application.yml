@@ -1,0 +1,17 @@
+spring:
+  shell:
+    interactive:
+      enabled: false
+
+streaming:
+  history:
+    file: StreamingHistory.json
+
+jellyfin:
+  base-url: http://localhost:8096
+  api-token: test
+  similar-artist:
+    min-common-length: 5
+  featuring-artists:
+    markers:
+      - "feat."

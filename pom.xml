@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0-RC1</version>
+		<version>4.0.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>net.dahanne</groupId>
@@ -13,22 +13,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>jellyfin-music-helper</name>
 	<description>Jellyfin Music Helper</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
 	<properties>
 		<java.version>25</java.version>
-		<spring-shell.version>4.0.0-M1</spring-shell.version>
+		<spring-shell.version>4.0.1</spring-shell.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -41,8 +28,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.shell</groupId>
-			<artifactId>spring-shell-starter</artifactId>
-            <version>4.0.0-M1</version>
+			<artifactId>spring-shell-starter-jna</artifactId>
+            <version>${spring-shell.version}</version>
 		</dependency>
 
 		<dependency>
@@ -63,7 +50,7 @@
 		<dependency>
 			<groupId>org.springframework.shell</groupId>
 			<artifactId>spring-shell-starter-test</artifactId>
-            <version>4.0.0-M1</version>
+            <version>${spring-shell.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

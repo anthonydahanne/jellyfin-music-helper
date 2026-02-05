@@ -42,8 +42,7 @@ public class JellyfinArtistService {
         try {
             HttpResponse<String> response = httpClient.send(builder.build(), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                System.err.println("Artist lookup failed (HTTP " + response.statusCode() + ")");
-                return artists;
+                throw new IOException("Artist lookup failed (HTTP " + response.statusCode());
             }
 
             JsonNode items = objectMapper.readTree(response.body()).path("Items");
@@ -58,10 +57,7 @@ public class JellyfinArtistService {
                 }
             });
         } catch (IOException | InterruptedException e) {
-            System.err.println("Artist lookup error: " + e.getMessage());
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+            throw new RuntimeException(e);
         }
         return artists;
     }

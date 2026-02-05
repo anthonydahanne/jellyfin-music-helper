@@ -18,6 +18,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +32,7 @@ public class SpotifyHistoryMatcher {
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
     private final JellyfinRequestFactory requestFactory;
+    private final JellyfinArtistService jellyfinArtistService;
     private final Path historyPath;
     private final Map<String, LookupResult> jellyfinCache = new ConcurrentHashMap<>();
 
@@ -38,10 +40,12 @@ public class SpotifyHistoryMatcher {
             ObjectMapper objectMapper,
             HttpClient jellyfinHttpClient,
             JellyfinRequestFactory requestFactory,
+            JellyfinArtistService jellyfinArtistService,
             @Value("${streaming.history.file}") String historyFile) {
         this.objectMapper = objectMapper;
         this.httpClient = jellyfinHttpClient;
         this.requestFactory = requestFactory;
+        this.jellyfinArtistService = jellyfinArtistService;
         this.historyPath = Path.of(historyFile);
     }
 
@@ -62,6 +66,45 @@ public class SpotifyHistoryMatcher {
                         _ -> queryJellyfinForTrack(track.artist(), track.track()));
             }
             printLookupLine(track.displayArtist(), track.displayTrack(), aggregate.count(), result);
+        }
+    }
+
+    public void listMissingArtistsFromSpotify() {
+        List<StreamingHistoryEntry> entries = readStreamingHistory();
+        if (entries.isEmpty()) {
+            return;
+        }
+
+        Map<String, String> spotifyArtists = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (StreamingHistoryEntry entry : entries) {
+            if (entry == null || entry.artistName() == null) {
+                continue;
+            }
+            String normalized = normalizeArtistName(entry.artistName());
+            if (normalized.isEmpty()) {
+                continue;
+            }
+            spotifyArtists.putIfAbsent(normalized, entry.artistName());
+        }
+
+        Set<String> jellyfinArtists = new HashSet<>();
+        for (JellyfinArtistService.Artist artist : jellyfinArtistService.fetchArtists()) {
+            String normalized = normalizeArtistName(artist.name());
+            if (!normalized.isEmpty()) {
+                jellyfinArtists.add(normalized);
+            }
+        }
+
+        List<String> missing = spotifyArtists.entrySet().stream()
+                .filter(entry -> !jellyfinArtists.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+
+        if (missing.isEmpty()) {
+            System.out.println("All Spotify artists exist in Jellyfin.");
+        } else {
+            missing.forEach(System.out::println);
         }
     }
 
@@ -90,6 +133,16 @@ public class SpotifyHistoryMatcher {
             aggregate.increment();
         }
         return aggregates;
+    }
+
+    private String normalizeArtistName(String value) {
+        if (value == null) {
+            return "";
+        }
+        String lower = value.toLowerCase(Locale.ROOT);
+        String withoutDiacritics = Normalizer.normalize(lower, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "");
+        return withoutDiacritics.replaceAll("[^a-z0-9]", "");
     }
 
     private void printLookupLine(String artist, String track, int count, LookupResult result) {

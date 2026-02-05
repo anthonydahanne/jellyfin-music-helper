@@ -33,6 +33,8 @@ JAVA_TOOL_OPTIONS="--enable-native-access=ALL-UNNAMED" ./mvnw spring-boot:run
 3. `list-artists-with-similar-names`
    - Finds pairs of artists whose names share at least `jellyfin.similar-artist.min-common-length` characters (default 5).
    - Normalizes by removing accents/punctuation before comparing.
+4. `missing-artists-from-spotify`
+   - Compares unique Spotify artist names in the history export with Jellyfin’s artist catalog and prints the ones not found.
 
 ## Configuration
 
